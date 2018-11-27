@@ -43,13 +43,15 @@ func PulseEvent(handle syscall.Handle) (err error) {
 
 func main() {
 	var pid int
-	flag.IntVar(&pid, "pid", -1, "PID of docker daemon to signal to dump stacks")
+	var key string
+	flag.StringVar(&key, "key", "docker-daemon", "The 'key' override in 'Global\\key-pid'. docker=docker-daemon, containerd=containerd-daemon, conatinerd-runhcs-shim-v1=containerd-shim-runhcs-v1")
+	flag.IntVar(&pid, "pid", -1, "PID of process to signal to dump stacks")
 	flag.Parse()
 	if pid == -1 {
 		fmt.Println("Error: pid must be supplied")
 		return
 	}
-	ev := "Global\\docker-daemon-" + fmt.Sprint(pid)
+	ev := fmt.Sprintf("Global\\%s-%s", key, fmt.Sprint(pid))
 	h2, _ := OpenEvent(EVENT_MODIFY_STATUS, false, ev)
 	if h2 == 0 {
 		fmt.Printf("Could not open event. Check PID %d is correct and the daemon is running.\n", pid)
